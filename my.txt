@@ -1,0 +1,8 @@
+const res = await fetch("https://mart-backend-o7xd.onrender.com/place-order", {
+
+    const res = await fetch("http://localhost:5000/place-order", {
+
+        👉 ❌ Delete order button
+👉 🔄 Order status (Pending / Delivered)
+👉 🔐 Admin login
+👉 📊 Dashboard UI
