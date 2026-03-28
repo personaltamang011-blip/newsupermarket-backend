@@ -6,13 +6,13 @@ const cors = require("cors");
 
 const app = express();
 
-// ✅ Enable CORS for all origins (important for frontend on Vercel or any domain)
+// ✅ CORS (important for frontend connection)
 app.use(cors({ origin: "*" }));
 
-// ✅ Parse JSON body
+// ✅ JSON parser
 app.use(express.json());
 
-// ✅ MongoDB Atlas from .env (NO localhost DB)
+// ✅ MongoDB Atlas from .env
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
@@ -20,7 +20,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// ✅ Connect to Atlas
+// ✅ Connect DB
 mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Atlas Connected"))
   .catch(err => {
@@ -28,37 +28,77 @@ mongoose.connect(MONGO_URI)
     process.exit(1);
   });
 
-// 📦 Schema
+/* ================= SCHEMA ================= */
 const OrderSchema = new mongoose.Schema({
   customer: String,
   phone: String,
-  items: Array,
+  items: [
+    {
+      name: String,
+      price: Number,
+      qty: Number
+    }
+  ],
   total: Number,
   status: {
     type: String,
     default: "Pending"
   },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
+
 const Order = mongoose.model("Order", OrderSchema);
 
-// 🟢 Save order
+/* ================= ROUTES ================= */
+
+// 🟢 Place Order
 app.post("/place-order", async (req, res) => {
   try {
     const order = new Order(req.body);
     await order.save();
 
     res.json({ success: true, message: "Order saved!" });
+
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 🔵 Get orders
+// 🔵 Get Orders
 app.get("/orders", async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: orders });
+
+    res.json({
+      success: true,
+      data: orders
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 🟡 Update Status
+app.put("/order/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: "Status updated",
+      data: updatedOrder
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -73,36 +113,14 @@ app.delete("/order/:id", async (req, res) => {
       success: true,
       message: "Order deleted"
     });
+
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 🟡 Update Order Status
-app.put("/order/:id", async (req, res) => {
-  try {
-    const updated = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
+/* ================= SERVER ================= */
 
-    res.json({
-      success: true,
-      data: updated
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-// ✅ Dynamic PORT for Render or local computer
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
