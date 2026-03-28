@@ -1,6 +1,6 @@
 async function loadOrders() {
   try {
-    const res = await fetch("http://localhost:5000/orders");
+    const res = await fetch("https://mart-backend-o7xd.onrender.com/orders");
     const orders = await res.json();
 
     const container = document.getElementById("orders");
