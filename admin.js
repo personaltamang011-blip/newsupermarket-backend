@@ -1,5 +1,4 @@
-/* ================= CONFIG ================= */
-const API_BASE = window.location.hostname === "localhost"
+const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:5000"
   : "https://mart-backend-o7xd.onrender.com";
 
@@ -9,9 +8,11 @@ async function loadOrders() {
   container.innerHTML = "Loading...";
 
   try {
-    const res = await fetch(`${API_BASE}/orders`);
+    const res = await fetch(`${API_URL}/orders`);
     const data = await res.json();
     const orders = data.data || data;
+
+    console.log("Orders:", orders);
 
     if (!orders.length) {
       container.innerHTML = "No orders found";
@@ -22,31 +23,33 @@ async function loadOrders() {
 
     orders.forEach(order => {
       const div = document.createElement("div");
-      div.style.border = "1px solid #ccc";
-      div.style.padding = "10px";
-      div.style.margin = "10px";
 
       let itemsHTML = "";
       (order.items || []).forEach(item => {
         itemsHTML += `<li>${item.name} (Qty: ${item.qty})</li>`;
       });
 
-      const status = order.status || "Pending";
-
       div.innerHTML = `
         <hr>
         <p><b>Name:</b> ${order.customer}</p>
         <p><b>Phone:</b> ${order.phone}</p>
         <p><b>Total:</b> Rs ${order.total}</p>
-        <p><b>Items:</b></p>
+
         <ul>${itemsHTML}</ul>
-        <p><b>Status:</b> 
-          <span style="color:${status === "Pending" ? "orange" : "green"}">
-            ${status}
+
+        <p>Status: 
+          <span style="color:${order.status === "Delivered" ? "green" : "orange"}">
+            ${order.status || "Pending"}
           </span>
         </p>
-        <button onclick="updateStatus('${order._id}', 'Delivered')">✅ Mark Delivered</button>
-        <button onclick="deleteOrder('${order._id}')">❌ Delete</button>
+
+        <button onclick="updateStatus('${order._id}')">
+          ✅ Mark Delivered
+        </button>
+
+        <button onclick="deleteOrder('${order._id}')">
+          ❌ Delete
+        </button>
       `;
 
       container.appendChild(div);
@@ -58,32 +61,50 @@ async function loadOrders() {
   }
 }
 
-/* ================= DELETE ORDER ================= */
-async function deleteOrder(id) {
-  if (!confirm("Are you sure you want to delete this order?")) return;
-
+/* ================= UPDATE STATUS ================= */
+async function updateStatus(id) {
   try {
-    await fetch(`${API_BASE}/order/${id}`, { method: "DELETE" });
-    alert("Order deleted!");
+    const res = await fetch(`${API_URL}/order/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status: "Delivered" })
+    });
+
+    const data = await res.json();
+    console.log("Update:", data);
+
+    if (!res.ok) throw new Error(data.error || "Update failed");
+
+    alert("✅ Status Updated!");
     loadOrders();
+
   } catch (err) {
     console.error(err);
-    alert("Error deleting order");
+    alert("❌ Failed to update");
   }
 }
 
-/* ================= UPDATE STATUS ================= */
-async function updateStatus(id, status) {
+/* ================= DELETE ================= */
+async function deleteOrder(id) {
+  if (!confirm("Delete this order?")) return;
+
   try {
-    await fetch(`${API_BASE}/order/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
+    const res = await fetch(`${API_URL}/order/${id}`, {
+      method: "DELETE"
     });
-    alert("Status updated!");
+
+    const data = await res.json();
+    console.log("Delete:", data);
+
+    if (!res.ok) throw new Error(data.error || "Delete failed");
+
+    alert("🗑️ Order Deleted!");
     loadOrders();
+
   } catch (err) {
     console.error(err);
-    alert("Error updating status");
+    alert("❌ Delete failed");
   }
 }
