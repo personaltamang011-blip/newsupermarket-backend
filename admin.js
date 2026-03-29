@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:5000"
   : "https://mart-backend-o7xd.onrender.com";
+=======
+const API_URL = "https://mart-backend-o7xd.onrender.com";
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
 /* ================= LOAD ORDERS ================= */
 async function loadOrders() {
@@ -10,9 +14,14 @@ async function loadOrders() {
   try {
     const res = await fetch(`${API_URL}/orders`);
     const data = await res.json();
+
     const orders = data.data || data;
 
+<<<<<<< HEAD
     console.log("Orders:", orders);
+=======
+    console.log("Orders:", orders); // 🔍 DEBUG
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
     if (!orders.length) {
       container.innerHTML = "No orders found";
@@ -63,6 +72,11 @@ async function loadOrders() {
 
 /* ================= UPDATE STATUS ================= */
 async function updateStatus(id) {
+<<<<<<< HEAD
+=======
+  console.log("Updating ID:", id); // 🔍 DEBUG
+
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
   try {
     const res = await fetch(`${API_URL}/order/${id}`, {
       method: "PUT",
@@ -73,9 +87,13 @@ async function updateStatus(id) {
     });
 
     const data = await res.json();
+<<<<<<< HEAD
     console.log("Update:", data);
 
     if (!res.ok) throw new Error(data.error || "Update failed");
+=======
+    console.log(data);
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
     alert("✅ Status Updated!");
     loadOrders();
@@ -86,8 +104,15 @@ async function updateStatus(id) {
   }
 }
 
+<<<<<<< HEAD
 /* ================= DELETE ================= */
 async function deleteOrder(id) {
+=======
+/* ================= DELETE ORDER ================= */
+async function deleteOrder(id) {
+  console.log("Deleting ID:", id); // 🔍 DEBUG
+
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
   if (!confirm("Delete this order?")) return;
 
   try {
@@ -96,9 +121,13 @@ async function deleteOrder(id) {
     });
 
     const data = await res.json();
+<<<<<<< HEAD
     console.log("Delete:", data);
 
     if (!res.ok) throw new Error(data.error || "Delete failed");
+=======
+    console.log(data);
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
     alert("🗑️ Order Deleted!");
     loadOrders();

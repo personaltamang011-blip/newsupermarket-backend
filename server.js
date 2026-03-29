@@ -75,10 +75,14 @@ app.get("/orders", async (req, res) => {
     res.json({
       success: true,
       data: orders
+<<<<<<< HEAD
       
     });
     console.log(order._id)
     
+=======
+    });
+>>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
