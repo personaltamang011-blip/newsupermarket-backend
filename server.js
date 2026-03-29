@@ -75,14 +75,10 @@ app.get("/orders", async (req, res) => {
     res.json({
       success: true,
       data: orders
-<<<<<<< HEAD
       
     });
     console.log(order._id)
     
-=======
-    });
->>>>>>> 1604130149f61ccf79819dab14f1fc7a79e13da3
 
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -97,32 +93,53 @@ app.put("/order/:id", async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { returnDocument: "after" } // ✅ updated fix (no warning)
     );
 
-    res.json({
+    // ❗ STOP if not found
+    if (!updatedOrder) {
+      return res.status(404).json({
+        success: false,
+        error: "Order not found"
+      });
+    }
+
+    // ✅ ONLY ONE RESPONSE
+    return res.json({
       success: true,
       message: "Status updated",
       data: updatedOrder
     });
 
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 });
-
 // 🔴 Delete Order
 app.delete("/order/:id", async (req, res) => {
   try {
-    await Order.findByIdAndDelete(req.params.id);
+    const deleted = await Order.findByIdAndDelete(req.params.id);
 
-    res.json({
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        error: "Order not found"
+      });
+    }
+
+    return res.json({
       success: true,
       message: "Order deleted"
     });
 
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 });
 
